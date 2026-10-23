@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Pecahan - Gim Edukasi Matematika</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+            font-family: 'Quicksand', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .game-container {
+            width: 800px;
+            height: 500px;
+            background: linear-gradient(to bottom, #68d8d6, #07beb8);
+            border: 8px solid #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        /* Latar Belakang Alam / Clay Style */
+        .background-scenery {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .cloud {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50px;
+            opacity: 0.8;
+            animation: moveClouds 20s linear infinite;
+        }
+        @keyframes moveClouds {
+            from { transform: translateX(-150px); }
+            to { transform: translateX(950px); }
+        }
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80px;
+            background: #2ab7ca;
+            border-top: 10px solid #fed766;
+            z-index: 2;
+        }
+        .ground-pattern {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            background: #54b53a;
+            border-top: 8px solid #85e3ff;
+            z-index: 3;
+        }
+        /* Karakter Clay 3D (Representasi Visual CSS) */
+        .player {
+            position: absolute;
+            bottom: 80px;
+            left: 100px;
+            width: 50px;
+            height: 60px;
+            background: #ff5964;
+            border-radius: 25px 25px 15px 15px;
+            box-shadow: inset -5px -5px 0px rgba(0,0,0,0.2), 0 5px 10px rgba(0,0,0,0.3);
+            z-index: 5;
+            transition: bottom 0.3s ease;
+        }
+        .player::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 30px;
+            height: 25px;
+            background: #ffe6a7;
+            border-radius: 50%;
+            box-shadow: inset -3px -3px 0px rgba(0,0,0,0.1);
+        }
+        /* UI & Panel Soal */
+        .ui-panel {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            font-family: 'Fredoka One', cursive;
+            color: #fff;
+            font-size: 20px;
+            text-shadow: 2px 2px 0px #333;
+        }
+        .question-box {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 15px 30px;
+            border-radius: 15px;
+            border: 4px solid #fed766;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            z-index: 10;
+            font-family: 'Fredoka One', cursive;
+            color: #333;
+            font-size: 22px;
+            min-width: 400px;
+        }
+        .options-container {
+            position: absolute;
+            bottom: 110px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10;
+        }
+        .btn-option {
+            background: #fed766;
+            border: none;
+            border-bottom: 6px solid #e6be4a;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 20px;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            transition: all 0.1s ease;
+        }
+        .btn-option:hover {
+            background: #ffe082;
+            transform: translateY(-2px);
+        }
+        .btn-option:active {
+            transform: translateY(4px);
+            border-bottom-width: 2px;
+        }
+        /* Layar Mulai & Selesai */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(7, 190, 184, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            font-family: 'Fredoka One', cursive;
+            color: #fff;
+            text-align: center;
+        }
+        .screen h1 {
+            font-size: 45px;
+            color: #fed766;
+            text-shadow: 3px 3px 0px #ff5964;
+            margin-bottom: 10px;
+        }
+        .screen p {
+            font-size: 18px;
+            margin-bottom: 25px;
+            max-width: 500px;
+        }
+        .btn-main {
+            background: #ff5964;
+            border: none;
+            border-bottom: 6px solid #d43f4c;
+            padding: 15px 40px;
+            border-radius: 20px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 24px;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+        }
+        .btn-main:hover {
+            background: #ff7580;
+            transform: translateY(-3px);
+        }
+        .btn-main:active {
+            transform: translateY(3px);
+            border-bottom-width: 3px;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- Latar Belakang Alam -->
+    <div class="background-scenery">
+        <div class="cloud" style="width: 100px; height: 40px; top: 40px; animation-duration: 25s;"></div>
+        <div class="cloud" style="width: 140px; height: 50px; top: 90px; animation-duration: 18s; animation-delay: -5s;"></div>
+    </div>
+
+    <!-- Elemen Tanah & Dekorasi -->
+    <div class="ground"></div>
+    <div class="ground-pattern"></div>
+
+    <!-- Karakter 3D Clay -->
+    <div class="player" id="player"></div>
+
+    <!-- Panel Informasi Atas -->
+    <div class="ui-panel">
+        <div id="score-display">Skor: 0</div>
+        <div id="level-display">Soal: 1 / 5</div>
+    </div>
+
+    <!-- Kotak Soal Matematika Pecahan -->
+    <div class="question-box" id="question-box">
+        Memuat Soal...
+    </div>
+
+    <!-- Pilihan Jawaban -->
+    <div class="options-container" id="options-container">
+        <!-- Tombol pilihan akan dirender otomatis via JavaScript -->
+    </div>
+
+    <!-- Layar Utama / Start Screen -->
+    <div id="start-screen" class="screen">
+        <h1>Petualangan Pecahan</h1>
+        <p>Bantu Budi si Petualang menjelajahi alam sambil menguasai materi Pecahan Matematika Kelas 4 SD!</p>
+        <button class="btn-main" onclick="startGame()">Mulai Bertualang!</button>
+    </div>
+
+    <!-- Layar Permainan Selesai / Game Over -->
+    <div id="end-screen" class="screen hidden">
+        <h1 id="end-title">Hore! Petualangan Selesai!</h1>
+        <p id="end-message">Kamu berhasil mengumpulkan skor maksimal!</p>
+        <button class="btn-main" onclick="startGame()">Main Lagi</button>
+    </div>
+</div>
+
+<script>
+    // Daftar Soal Pecahan Kelas 4 SD
+    const questions = [
+        {
+            question: "Berapa bentuk pecahan dari bagian yang diwarnai jika sebuah apel dipotong menjadi 4 bagian sama besar dan diambil 2 bagian?",
+            options: ["1/2", "1/4", "3/4", "2/3"],
+            answer: "1/2"
+        },
+        {
+            question: "Manakah pecahan yang nilainya paling besar di bawah ini?",
+            options: ["1/4", "3/4", "2/4", "0/4"],
+            answer: "3/4"
+        },
+        {
+            question: "Hasil penjumlahan dari 2/5 + 1/5 adalah...",
+            options: ["3/10", "3/5", "2/10", "1/5"],
+            answer: "3/5"
+        },
+        {
+            question: "Ibu memotong kue menjadi 8 bagian. Ani memakan 3 bagian. Berapa sisa bagian kue Ibu?",
+            options: ["3/8", "5/8", "2/8", "6/8"],
+            answer: "5/8"
+        },
+        {
+            question: "Pecahan 6/8 jika disederhanakan menjadi...",
+            options: ["1/2", "2/3", "3/4", "4/5"],
+            answer: "3/4"
+        }
+    ];
+
+    let currentLevel = 0;
+    let score = 0;
+
+    const startScreen = document.getElementById("start-screen");
+    const endScreen = document.getElementById("end-screen");
+    const questionBox = document.getElementById("question-box");
+    const optionsContainer = document.getElementById("options-container");
+    const scoreDisplay = document.getElementById("score-display");
+    const levelDisplay = document.getElementById("level-display");
+    const player = document.getElementById("player");
+    const endTitle = document.getElementById("end-title");
+    const endMessage = document.getElementById("end-message");
+
+    function startGame() {
+        currentLevel = 0;
+        score = 0;
+        startScreen.classList.add("hidden");
+        endScreen.classList.add("hidden");
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentLevel < questions.length) {
+            let q = questions[currentLevel];
+            questionBox.innerHTML = q.question;
+            scoreDisplay.innerText = "Skor: " + score;
+            levelDisplay.innerText = "Soal: " + (currentLevel + 1) + " / " + questions.length;
+
+            // Render Pilihan Jawaban
+            optionsContainer.innerHTML = "";
+            q.options.forEach(opt => {
+                let btn = document.createElement("button");
+                btn.className = "btn-option";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, q.answer);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Efek animasi lompat karakter
+            player.style.bottom = "120px";
+            setTimeout(() => { player.style.bottom = "80px"; }, 300);
+        } else {
+            endGame();
+        }
+    }
+
+    function checkAnswer(selected, correct) {
+        if (selected === correct) {
+            score += 20;
+            // Efek lompat sukses
+            player.style.bottom = "150px";
+            setTimeout(() => { player.style.bottom = "80px"; }, 300);
+        }
+        currentLevel++;
+        loadQuestion();
+    }
+
+    function endGame() {
+        endScreen.classList.remove("hidden");
+        scoreDisplay.innerText = "Skor: " + score;
+        if (score >= 80) {
+            endTitle.innerText = "Luar Biasa! 🎉";
+            endMessage.innerText = `Kamu berhasil menyelesaikan petualangan pecahan dengan skor ${score}. Kamu hebat dalam matematika!`;
+        } else {
+            endTitle.innerText = "Kerja Bagus! 👍";
+            endMessage.innerText = `Skor kamu ${score}. Teruslah berlatih mengenal pecahan agar semakin pintar!`;
+        }
+    }
+</script>
+
+</body>
+</html>
